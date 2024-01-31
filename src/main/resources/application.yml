@@ -1,0 +1,47 @@
+server:
+  port: 9884
+
+spring:
+  kafka:
+    # hosts文件注意配一下192.168.2.6 kafka 解决java.net.UnknownHostException kafka
+    bootstrap-servers: 192.168.2.6:9092
+    producer:
+      acks: all # 所有副本都接收消息才算发送成功
+      retries: 3
+      # 批量发送的消息数量,超过1MB时发送
+      batch-size: 1048576
+      # 1MB的批处理缓冲区1024*1024
+      buffer-memory: 1048576
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        linger-ms: 2000 # 默认0ms 立即发送,不修改则上面两条失效
+
+    consumer:
+      # 自定义开关
+      enabled: true
+      # 设置默认消费组
+      group-id: etl
+      # 消息签收机制：手动签收
+      enable-auto-commit: false
+      # 自动提交时间间隔， 这种直接拉到数据就提交 容易丢数据
+      auto-commit-interval: 2000
+      # 该属性指定了消费者在读取一个没有偏移量的分区或者偏移量无效的情况下该作何处理：
+      # latest（默认值）在偏移量无效的情况下，消费者将从最新的记录开始读取数据（在消费者启动之后生成的记录）
+      # earliest ：在偏移量无效的情况下，消费者将从起始位置读取分区的记录
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # 批量一次最大拉取数据量
+      max-poll-records: 5
+      # 批量拉取间隔，要大于批量拉取数据的处理时间，时间间隔太小会有重复消费
+      fetch-max-wait: 5000
+
+    listener:
+      concurrency: 1  # 并发消费线程
+      poll-timeout: 50000 #  轮询消费者时使用的超时（以毫秒为单位）
+
+
+kafka:
+  topic:
+    one: my-topic
